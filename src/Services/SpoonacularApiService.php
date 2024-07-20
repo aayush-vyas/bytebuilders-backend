@@ -49,4 +49,9 @@ class SpoonacularApiService
     {
         return $this->request("recipes/{$id}/information", array_merge(['includeNutrition' => 'false'], $additionalParams));
     }
+
+    public function fetchRecipeRecommendations(array $queryParams): array
+    {
+        return $this->request("recipes/complexSearch", $queryParams);
+    }
 }
