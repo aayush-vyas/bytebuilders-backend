@@ -3,12 +3,19 @@
 namespace App\Entity;
 
 use App\Repository\DietRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DietRepository::class)]
 #[ORM\Table(schema: 'reference_data')]
 class Diet
 {
+    const GLUTEN_FREE='Gluten Free';
+    const LACTO_VEGETARIAN ='Lacto-Vegetarian';
+    const KETOGENIC = 'Ketogenic';
+    const VEGETARIAN ='Vegetarian';
+    const VEGAN ='Vegan';
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -16,6 +23,17 @@ class Diet
 
     #[ORM\Column(length: 50)]
     private ?string $title = null;
+
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'diets')]
+    private Collection $users;
+
+    public function __construct()
+    {
+        $this->users = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -31,6 +49,32 @@ class Diet
     {
         $this->title = $title;
 
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addDiet($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeDiet($this);
+        }
         return $this;
     }
 }

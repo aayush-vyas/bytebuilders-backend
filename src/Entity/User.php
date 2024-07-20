@@ -38,22 +38,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Diet>
      */
-    #[ORM\ManyToMany(targetEntity: Diet::class)]
+    #[ORM\ManyToMany(targetEntity: Diet::class , inversedBy: 'users')]
     #[ORM\JoinTable(schema: 'user_management')]
     private Collection $diets;
     
     /**
      * @var Collection<int, Allergies>
      */
-    #[ORM\ManyToMany(targetEntity: Allergies::class)]
+    #[ORM\ManyToMany(targetEntity: Allergies::class , inversedBy: 'users')]
     #[ORM\JoinTable(schema: 'user_management')]
     private Collection $allergies;
+
+    /**
+     * @var Collection<int, Cuisine>
+     */
+    #[ORM\ManyToMany(targetEntity: Cuisine::class, inversedBy: 'users')]
+    #[ORM\JoinTable(schema: 'user_management')]
+    private Collection $cuisine;
 
     public function __construct()
     {
         $this->diets = new ArrayCollection();
         $this->allergies = new ArrayCollection();
         $this->lastLogin = new \DateTimeImmutable();
+        $this->cuisine = new ArrayCollection();
 
     }
 
@@ -183,5 +191,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
+    }
+
+    /**
+     * @return Collection<int, Cuisine>
+     */
+    public function getCuisine(): Collection
+    {
+        return $this->cuisine;
+    }
+
+    public function addCuisine(Cuisine $cuisine): static
+    {
+        if (!$this->cuisine->contains($cuisine)) {
+            $this->cuisine->add($cuisine);
+        }
+
+        return $this;
+    }
+
+    public function removeCuisine(Cuisine $cuisine): static
+    {
+        $this->cuisine->removeElement($cuisine);
+
+        return $this;
     }
 }
