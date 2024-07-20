@@ -32,7 +32,7 @@ class RecipeController extends AbstractController
         return new JsonResponse($data);
     }
 
-    #[Route('/api/recipe/recommend', name: 'app_recipe_recommend', methods: 'POST')]
+    #[Route('/api/recipe/recommend', name: 'app_recipe_recommend', methods: 'GET')]
     public function getRecipeRecommendations(Request $request): JsonResponse
     {
         $queryParams = [];
@@ -44,6 +44,24 @@ class RecipeController extends AbstractController
         }
 
         $data = $this->spoonacularApiService->fetchRecipeRecommendations($queryParams);
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/api/recipe/{id}', name: 'app_recipe_single', methods: 'GET')]
+    public function getRecipeById(Request $request): JsonResponse
+    {
+        $recipeId = $request->attributes->get('id');
+        $queryParams = [];
+        $searchParams = ['includeIngredients', 'excludeIngredients', 'diet', 'cuisine', 'type', 'query', 'intolerances'];
+        foreach ($request->query->all() as $key => $value) {
+            if (in_array($key, $searchParams)) {
+                $queryParams[$key] = $value;
+            }
+        }
+
+        $data = $this->spoonacularApiService->fetchRecipeInformation($recipeId, $queryParams);
+        $data = $this->recipeService->singleRecipesWithFilteredDetails($data);
 
         return new JsonResponse($data);
     }
