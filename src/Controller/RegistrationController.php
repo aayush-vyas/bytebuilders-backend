@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class RegistrationController extends AbstractController
 {
@@ -28,22 +29,39 @@ class RegistrationController extends AbstractController
         $this->logger = $logger;
     }
 
-    #[Route('/api/register', name: 'api_register',methods: 'POST')]
-
+    #[Route('/api/register', name: 'api_register', methods: ['POST'])]
     public function register(Request $request): JsonResponse
     {
-        $this->logger->info('Register endpoint hit');
-
         $data = json_decode($request->getContent(), true);
 
         $username = $data['username'] ?? null;
         $email = $data['email'] ?? null;
         $password = $data['password'] ?? null;
 
-        if (!$username || !$email || !$password) {
-            return new JsonResponse(['error' => 'Invalid input'], 400);
+        // Basic validation for input fields
+        $constraints = new Assert\Collection([
+            'username' => [new Assert\NotBlank(), new Assert\Length(['min' => 3])],
+            'email' => [new Assert\NotBlank(), new Assert\Email()],
+            'password' => [new Assert\NotBlank(), new Assert\Length(['min' => 6])],
+        ]);
+
+        $violations = $this->validator->validate($data, $constraints);
+
+        if (count($violations) > 0) {
+            $errorMessages = [];
+            foreach ($violations as $violation) {
+                $errorMessages[] = $violation->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], 400);
         }
 
+        // Check if user already exists
+        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        if ($existingUser) {
+            return new JsonResponse(['error' => 'Email is already registered'], 400);
+        }
+
+        // Create a new user
         $user = new User();
         $user->setUsername($username);
         $user->setEmail($email);
