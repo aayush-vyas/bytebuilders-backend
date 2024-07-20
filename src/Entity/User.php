@@ -53,6 +53,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->diets = new ArrayCollection();
         $this->allergies = new ArrayCollection();
+        $this->lastLogin = new \DateTimeImmutable();
+
     }
 
     public function getId(): ?int
