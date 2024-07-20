@@ -7,11 +7,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`', schema: 'user_management')]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    const ROLE_USER =  "ROLE_USER";
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -163,5 +166,20 @@ class User
         $this->allergies->removeElement($allergy);
 
         return $this;
+    }
+
+    public function getRoles(): array
+    {
+        $roles[] = User::ROLE_USER;
+
+        return array_unique($roles);    }
+
+    public function eraseCredentials()
+    {
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
     }
 }
