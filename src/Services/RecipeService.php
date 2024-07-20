@@ -5,7 +5,7 @@ namespace App\Services;
 class RecipeService
 {
 
-    public function __construct(private  SpoonacularApiService $spoonacularApiService)
+    public function __construct(private SpoonacularApiService $spoonacularApiService, private YoutubeApiService $youtubeApiService)
     {
     }
 
@@ -47,6 +47,8 @@ class RecipeService
 
     public function singleRecipesWithFilteredDetails($recipeDetails)
     {
+        $youtubeLinks = $this->youtubeApiService->fetchVideoLinksFromQuery($recipeDetails['title']);
+
         return [
             'id' => $recipeDetails['id'],
             'title' => $recipeDetails['title'],
@@ -73,6 +75,7 @@ class RecipeService
             'occasions' => $recipeDetails['occasions'],
             'analyzedInstructions' => $this->filteranalyzedInstructions($recipeDetails['analyzedInstructions']),
             'extendedIngredients' => $this->filterExtendedIngredients($recipeDetails['extendedIngredients']),
+            'youtubeLink' => $youtubeLinks
         ];
     }
 
@@ -85,6 +88,7 @@ class RecipeService
             ];
         }, $ingredients);
     }
+
     public function fetchRecipesWithFilteredDetails($data)
     {
         foreach ($data['results'] as &$recipe) {
