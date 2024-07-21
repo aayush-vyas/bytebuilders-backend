@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\RecipeMetaRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RecipeMetaRepository::class)]
 #[ORM\Table(schema: 'reference_data')]
@@ -16,15 +17,19 @@ class RecipeMeta
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups("recipe:read")]
     private ?string $instructions = null;
 
     #[ORM\Column]
+    #[Groups("recipe:read")]
     private array $analysedInstructions = [];
 
     #[ORM\Column]
+    #[Groups("recipe:read")]
     private ?int $healthScore = null;
 
     #[ORM\Column]
+    #[Groups("recipe:read")]
     private array $ingredients = [];
 
     public function getId(): ?int
