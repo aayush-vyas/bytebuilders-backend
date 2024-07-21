@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\WeeklyMealPlan;
+use Carbon\Carbon;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -40,6 +41,24 @@ class WeeklyMealPlanRepository extends ServiceEntityRepository
 
         return $data;
     }
+
+    public function fetchUsersWeeklyPlan(Carbon $startDate): array
+    {
+        $endDate = $startDate->endOfWeek();
+
+        $meals = $this->createQueryBuilder('wmp')
+            ->select('json_agg()')
+            ->where('wmp.user_id_id', $this->getUser()->getId())
+            ->where('wmp.planDate BETWEEN :startDate AND :endDate')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->groupBy('wmp.planDate')
+            ->orderBy('wmp.planDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+        dd($meals);
+    } 
+    
     //    /**
     //     * @return WeeklyMealPlan[] Returns an array of WeeklyMealPlan objects
     //     */

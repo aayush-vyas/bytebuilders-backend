@@ -45,14 +45,14 @@ class Recipe
     #[ORM\Column]
     private ?int $recipeId = null;
 
-    #[ORM\Column(type: Types::ARRAY)]
-    private array $cuisines = [];
+    #[ORM\Column(type: Types::TEXT,nullable: true)]
+    private string $cuisines;
 
-    #[ORM\Column(type: Types::ARRAY)]
-    private array $dishTypes = [];
+    #[ORM\Column(type: Types::TEXT,nullable: true)]
+    private string $dishTypes;
 
-    #[ORM\Column(type: Types::ARRAY)]
-    private array $diets = [];
+    #[ORM\Column(type: Types::TEXT,nullable: true)]
+    private string $diets;
 
     public function getId(): ?int
     {
@@ -179,36 +179,37 @@ class Recipe
         return $this;
     }
 
-    public function getCuisines(): array
+    public function getCuisines(): string
     {
         return $this->cuisines;
     }
 
-    public function setCuisines(array $cuisines): static
+    public function setCuisines(string $cuisines): static
     {
         $this->cuisines = $cuisines;
 
         return $this;
     }
 
-    public function getDishTypes(): array
+    public function getDishTypes(): string
     {
+
         return $this->dishTypes;
     }
 
-    public function setDishTypes(array $dishTypes): static
+    public function setDishTypes(string $dishTypes): static
     {
         $this->dishTypes = $dishTypes;
 
         return $this;
     }
 
-    public function getDiets(): array
+    public function getDiets(): string
     {
         return $this->diets;
     }
 
-    public function setDiets(array $diets): static
+    public function setDiets(string $diets): static
     {
         $this->diets = $diets;
 
