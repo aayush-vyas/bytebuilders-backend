@@ -35,9 +35,12 @@ class RecipeController extends AbstractController
         }
 
         $data = $this->spoonacularApiService->fetchAllRecipes($queryParams);
-        $data = $this->recipeService->filterRecipeDetails($data);
+        $response = [];
+        foreach ($data["results"] as $row){
+            $response[] = $this->recipeService->fetchRecipeDetailsWithFilter($row["id"]);
+        }
 
-        return new JsonResponse($data);
+        return new JsonResponse($response);
     }
 
     #[Route('/api/recipe/recommend', name: 'app_recipe_recommend', methods: "GET")]
