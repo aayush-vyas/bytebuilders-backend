@@ -12,6 +12,11 @@ class SpoonacularApiService
     private $apiKey;
     private $baseUrl;
 
+    Const API_STATUS_SUCCESS =  "success";
+    Const API_STATUS_ERROR =  "error";
+
+
+
     public function __construct(HttpClientInterface $httpClient, ContainerBagInterface $params)
     {
         $this->httpClient = $httpClient;

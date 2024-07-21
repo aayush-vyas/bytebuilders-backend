@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Services\SpoonacularApiService;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -60,7 +61,12 @@ class RegistrationController extends AbstractController
         // Check if user already exists
         $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
         if ($existingUser) {
-            return new JsonResponse(['error' => 'Email is already registered'], 400);
+            return new JsonResponse([
+                'status' => SpoonacularApiService::API_STATUS_ERROR,
+                'data' => [
+                    'message' => 'Email is already registered'
+                ]
+            ], 400);
         }
 
         // Create a new user
@@ -78,12 +84,25 @@ class RegistrationController extends AbstractController
             foreach ($errors as $error) {
                 $errorMessages[] = $error->getMessage();
             }
-            return new JsonResponse(['errors' => $errorMessages], 400);
+            return new JsonResponse([
+                'status' => SpoonacularApiService::API_STATUS_ERROR,
+                'data' => [
+                    'message' =>  $errorMessages
+                ]
+            ], 400);
         }
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return new JsonResponse(['token' => $JWTTokenManager->create($user)]);
+        return new JsonResponse([
+            'status' => SpoonacularApiService::API_STATUS_SUCCESS,
+            'data' => [
+                'message' => 'Registration Successful',
+                'userId' => $user->getId(),
+                'email' => $user->getEmail(),
+                'token' => $JWTTokenManager->create($user)
+            ]
+        ], 400);
     }
 }
