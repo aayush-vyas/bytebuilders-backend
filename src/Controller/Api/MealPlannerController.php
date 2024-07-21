@@ -3,8 +3,9 @@
 namespace App\Controller\Api;
 
 use App\Entity\Recipe;
+use App\Entity\User;
 use App\Entity\WeeklyMealPlan;
-use App\Enum\Recipe as EnumRecipe;
+use App\Enum\RecipeEnum;
 use Carbon\Carbon;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,21 +33,26 @@ class MealPlannerController extends AbstractController
         $data = json_decode($request->getContent());
         $date = new DateTime($data->date);
         $user = $this->getUser();
+        if(!$user)
+        {
+            return new JsonResponse(['message' => 'user not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
         $recipe = $em->getRepository(Recipe::class)->findOneById($data->recipeId);
         $meal = new WeeklyMealPlan();
         $meal->setPlanDate($date);
         $meal->setRecipe($recipe);
+
         switch ($data->slot) {
-            case EnumRecipe::BREAKFAST->value:
+            case RecipeEnum::BREAKFAST->value:
                 $meal->setTimeSlot($data->slot);
                 break;                
-            case EnumRecipe::LUNCH->value:
+            case RecipeEnum::LUNCH->value:
                 $meal->setTimeSlot($data->slot);
                 break;
-            case EnumRecipe::DINNER->value:
+            case RecipeEnum::DINNER->value:
                 $meal->setTimeSlot($data->slot);
                 break;
-            case EnumRecipe::SNACKS->value:
+            case RecipeEnum::SNACKS->value:
                 $meal->setTimeSlot($data->slot);
                 break;
             default:
@@ -57,9 +63,10 @@ class MealPlannerController extends AbstractController
 
         $em->persist($meal);
         $em->flush();
-        $newMeal = $em->getRepository(WeeklyMealPlan::class)->fetchUsersWeeklyPlan(Carbon::parse($date)->startOfWeek());
+        return new JsonResponse(['message' => 'Meal updated successfully'], JsonResponse::HTTP_OK);
+//        $newMeal = $em->getRepository(WeeklyMealPlan::class)->fetchUsersWeeklyPlan(Carbon::parse($date)->startOfWeek(), $user);
         
-        return new JsonResponse(json_decode($serializerInterface->serialize($newMeal, 'json')));
+//        return new JsonResponse(json_decode($serializerInterface->serialize($newMeal, 'json')));
     }
 
     #[Route('api/meal/delete/{id}', name: 'app_meal_delete', methods: ['GET'])]

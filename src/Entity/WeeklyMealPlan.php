@@ -7,7 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: WeeklyMealPlanRepository::class)]
-#[ORM\Table(schema: 'reference_data')]
+#[ORM\Table(schema: 'reference_data',name:"weekly_meal_plan")]
 class WeeklyMealPlan
 {
     #[ORM\Id]

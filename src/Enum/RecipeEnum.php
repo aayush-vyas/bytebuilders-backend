@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum Recipe: string
+enum RecipeEnum: string
 {
     case BREAKFAST = 'breakfast';
     case LUNCH = 'lunch';

@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\User;
 use App\Entity\WeeklyMealPlan;
 use Carbon\Carbon;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -59,22 +60,37 @@ class WeeklyMealPlanRepository extends ServiceEntityRepository
         return array_values($result);
     }
 
-    public function fetchUsersWeeklyPlan(Carbon $startDate): array
+    public function fetchUsersWeeklyPlan(Carbon $startDate, User $user): array
     {
-        $endDate = $startDate->endOfWeek();
+        $startDate = new \DateTime($startDate);
+        $endDate = clone $startDate;
+        $endDate->modify('sunday this week');
+        $id = $user->getId();
+        $connection = $this->getEntityManager()->getConnection();
 
-        $meals = $this->createQueryBuilder('wmp')
-            ->select('json_agg()')
-            ->where('wmp.user_id_id', $this->getUser()->getId())
-            ->where('wmp.planDate BETWEEN :startDate AND :endDate')
-            ->setParameter('startDate', $startDate)
-            ->setParameter('endDate', $endDate)
-            ->groupBy('wmp.planDate')
-            ->orderBy('wmp.planDate', 'ASC')
-            ->getQuery()
-            ->getResult();
-        dd($meals);
-    } 
+        $sql = '
+        SELECT 
+            plan_date, 
+            jsonb_agg(json_build_object(time_slot, json_build_object(r.id, r.title, r.image, rm.ingredients))) AS meal_data
+        FROM 
+            reference_data.weekly_meal_plan wmp 
+        JOIN 
+        reference_data.recipe r ON r.id = wmp.recipe_id 
+        JOIN 
+        reference_data.recipe_meta rm ON rm.id = r.recipe_id 
+        WHERE 
+        user_id_id = :userId
+        AND wmp.plan_date BETWEEN :startDate AND :endDate
+        GROUP BY 
+            plan_date
+    ';
+    
+        $stmt = $connection->prepare($sql);
+        $stmt->bindValue('userId', $id);
+        $stmt->bindValue('startDate', $startDate->format('Y-m-d'));
+        $stmt->bindValue('endDate', $endDate->format('Y-m-d'));
+        return !empty($stmt->executeQuery()->fetchAllAssociative()) ? $stmt->executeQuery()->fetchAllAssociative()[0]:[];
+    }
     
     //    /**
     //     * @return WeeklyMealPlan[] Returns an array of WeeklyMealPlan objects
