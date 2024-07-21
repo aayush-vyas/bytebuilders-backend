@@ -17,29 +17,46 @@ class WeeklyMealPlanRepository extends ServiceEntityRepository
         parent::__construct($registry, WeeklyMealPlan::class);
     }
 
-    public function fetchMealFrequencies(\DateTime $startDate):array
-    {
-        $endDate = (clone $startDate)->modify('+6 days');
-        $meals = $this->createQueryBuilder('wmp')
-            ->where('wmp.planDate BETWEEN :startDate AND :endDate')
-            ->setParameter('startDate', $startDate)
-            ->setParameter('endDate', $endDate)
-            ->orderBy('wmp.planDate', 'ASC')
-            ->getQuery()
-            ->getResult();
+    public function fetchMealFrequencies(\DateTime $startDate): array
+{
+    $endDate = (clone $startDate)->modify('+6 days');
+    $meals = $this->createQueryBuilder('wmp')
+        ->where('wmp.planDate BETWEEN :startDate AND :endDate')
+        ->setParameter('startDate', $startDate)
+        ->setParameter('endDate', $endDate)
+        ->orderBy('wmp.planDate', 'ASC')
+        ->getQuery()
+        ->getResult();
 
-        // Transform the result to only include necessary fields
-        $data = array_map(function($meal) {
-            return [
-                'id' => $meal->getId(),
-                'userId' => $meal->getUserId()->getId(),
-                'planDate' => $meal->getPlanDate()->format('Y-m-d'),
-                'timeSlot' => $meal->getTimeSlot(),
-                'recipeId' => $meal->getRecipe()->getId(),
+    $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    $result = [];
+
+    foreach ($meals as $meal) {
+        $dayOfWeek = $daysOfWeek[$meal->getPlanDate()->format('w')];
+
+        if (!isset($result[$dayOfWeek])) {
+            $result[$dayOfWeek] = [
+                'day' => $dayOfWeek,
+                'mealId' => $meal->getId(),
+                'breakfast' => [],
+                'lunch' => [],
+                'dinner' => [],
+                'snacks' => []
             ];
-        }, $meals);
+        }
 
-        return $data;
+        $timeSlot = strtolower($meal->getTimeSlot());
+        if (in_array($timeSlot, ['breakfast', 'lunch', 'dinner', 'snacks'])) {
+            $recipe = $meal->getRecipe();
+            // Add data for the corresponding time slot
+            $result[$dayOfWeek][$timeSlot][] = [
+                'recipe' => $recipe
+            ];
+        }
+    }
+        // Transform the result array to the desired format
+        return array_values($result);
     }
 
     public function fetchUsersWeeklyPlan(Carbon $startDate): array

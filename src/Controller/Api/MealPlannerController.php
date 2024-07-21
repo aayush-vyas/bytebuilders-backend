@@ -20,7 +20,8 @@ class MealPlannerController extends AbstractController
     #[Route('/api/meal/all', name: 'app_meal_planner')]
     public function getMealsByDate(Request $request, EntityManagerInterface $em): JsonResponse
     {
-        $startDate = new \DateTime('now');
+        $startDateStr = $request->request->get('startDate');
+        $startDate = new \DateTime($startDateStr);
         $meals = $em->getRepository(WeeklyMealPlan::class)->fetchMealFrequencies($startDate);
         return new JsonResponse($meals);
     }
@@ -59,6 +60,22 @@ class MealPlannerController extends AbstractController
         $newMeal = $em->getRepository(WeeklyMealPlan::class)->fetchUsersWeeklyPlan(Carbon::parse($date)->startOfWeek());
         
         return new JsonResponse(json_decode($serializerInterface->serialize($newMeal, 'json')));
+    }
+
+    #[Route('api/meal/delete/{id}', name: 'app_meal_delete', methods: ['GET'])]
+    public function deleteMeal(int $id, EntityManagerInterface $em)
+    {
+        $id = $em->getRepository(WeeklyMealPlan::class)->findOneBy(array('id' => $id));
+
+        if ($id != null){
+            $em->remove($id);
+            $em->flush();
+           // Return success response
+           return new JsonResponse(['message' => 'Meal deleted successfully'], JsonResponse::HTTP_OK);
+        }
+
+        // Return error response if meal not found
+        return new JsonResponse(['message' => 'Meal not found'], JsonResponse::HTTP_NOT_FOUND);
     }
 
 }
