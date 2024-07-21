@@ -23,6 +23,7 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
+            - '../src/Enum/'
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed

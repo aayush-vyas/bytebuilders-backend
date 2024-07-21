@@ -209,6 +209,7 @@ class Recipe
 
     public function getDishTypes(): string
     {
+
         return $this->dishTypes;
     }
 
