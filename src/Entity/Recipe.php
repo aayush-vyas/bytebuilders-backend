@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\RecipeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RecipeRepository::class)]
 #[ORM\Table(schema: 'reference_data')]
@@ -13,46 +15,60 @@ class Recipe
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("recipe:read")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("recipe:read")]
     private ?string $title = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups("recipe:read")]
     private ?int $readyInMinutes = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups("recipe:read")]
     private ?int $servings = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("recipe:read")]
     private ?string $image = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups("recipe:read")]
     private ?int $calories = null;
 
     #[ORM\Column]
+    #[Groups("recipe:read")]
     private ?bool $vegetarian = null;
 
     #[ORM\Column]
+    #[Groups("recipe:read")]
     private ?bool $vegan = null;
 
     #[ORM\Column]
+    #[Groups("recipe:read")]
     private ?bool $glutenFree = null;
 
     #[ORM\Column]
+    #[Groups("recipe:read")]
     private ?bool $dairyFree = null;
 
     #[ORM\Column]
+    #[Groups("recipe:read")]
     private ?int $recipeId = null;
 
-    #[ORM\Column(type: Types::ARRAY)]
-    private array $cuisines = [];
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups("recipe:read")]
+    private string $cuisines = '';
 
-    #[ORM\Column(type: Types::ARRAY)]
-    private array $dishTypes = [];
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups("recipe:read")]
+    private string $dishTypes = '';
 
-    #[ORM\Column(type: Types::ARRAY)]
-    private array $diets = [];
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups("recipe:read")]
+    private string $diets = '';
 
     public function getId(): ?int
     {
@@ -179,36 +195,36 @@ class Recipe
         return $this;
     }
 
-    public function getCuisines(): array
+    public function getCuisines(): string
     {
         return $this->cuisines;
     }
 
-    public function setCuisines(array $cuisines): static
+    public function setCuisines(string $cuisines): static
     {
         $this->cuisines = $cuisines;
 
         return $this;
     }
 
-    public function getDishTypes(): array
+    public function getDishTypes(): string
     {
         return $this->dishTypes;
     }
 
-    public function setDishTypes(array $dishTypes): static
+    public function setDishTypes(string $dishTypes): static
     {
         $this->dishTypes = $dishTypes;
 
         return $this;
     }
 
-    public function getDiets(): array
+    public function getDiets(): string
     {
         return $this->diets;
     }
 
-    public function setDiets(array $diets): static
+    public function setDiets(string $diets): static
     {
         $this->diets = $diets;
 

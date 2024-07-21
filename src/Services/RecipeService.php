@@ -16,7 +16,7 @@ class RecipeService
         return $this->filterRecipeDetails($recipeDetails);
     }
 
-    private function filterRecipeDetails($recipeDetails)
+    public function filterRecipeDetails($recipeDetails)
     {
         return [
             'id' => $recipeDetails['id'],
@@ -87,15 +87,6 @@ class RecipeService
                 'original' => $ingredient['original']
             ];
         }, $ingredients);
-    }
-
-    public function fetchRecipesWithFilteredDetails($data)
-    {
-        foreach ($data['results'] as &$recipe) {
-            $recipeDetails = $this->fetchRecipeDetailsWithFilter($recipe['id']);
-            $recipe['details'] = $recipeDetails;
-        }
-        return $data;
     }
 
     private function filteranalyzedInstructions($analyzedInstructions)

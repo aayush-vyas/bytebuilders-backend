@@ -41,7 +41,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Diet::class)]
     #[ORM\JoinTable(schema: 'user_management')]
     private Collection $diets;
-    
+
     /**
      * @var Collection<int, Allergies>
      */
@@ -54,7 +54,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->diets = new ArrayCollection();
         $this->allergies = new ArrayCollection();
         $this->lastLogin = new \DateTimeImmutable();
-
     }
 
     public function getId(): ?int
@@ -174,7 +173,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles[] = User::ROLE_USER;
 
-        return array_unique($roles);    }
+        return array_unique($roles);
+    }
 
     public function eraseCredentials()
     {
